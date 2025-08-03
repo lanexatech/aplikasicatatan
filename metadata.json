@@ -1,5 +1,6 @@
 {
   "name": "Simple Blue & White Card UI",
   "description": "A simple and elegant web application featuring a single-column card layout with a blue and white color scheme, built with React and Tailwind CSS.",
-  "requestFramePermissions": []
+  "requestFramePermissions": [],
+  "prompt": ""
 }

@@ -44,10 +44,21 @@ const cardsData: CardData[] = [
     id: 'aws',
     category: "AKUN ILMUPEDIA",
     title: "SERVER SINGAPORE ( AWS )",
-    description: "Server ini akan segera tersedia. Nantikan pembaruan selanjutnya!",
-    servers: [],
+    description: "Akun VLESS & TROJAN TLS siap pakai. Klik untuk melihat detail dan menyalin konfigurasi.",
+    servers: [
+      {
+        id: 'aws-vless',
+        name: 'VLESS + TLS',
+        config: 'vless://74f74221-6b82-4044-bdfa-f12ab4162d87@104.18.2.2:443?type=ws&encryption=none&security=tls&host=aws.lanexa.my.id&path=/vless-tls&allowInsecure=1&sni=aws.lanexa.my.id#XRAY_VLESS_TLS_alluser',
+      },
+      {
+        id: 'aws-trojan',
+        name: 'TROJAN + TLS',
+        config: 'trojan://18d53306-43ae-4ecf-a79a-6e39b07d0be0@104.18.2.2:443?type=ws&security=tls&host=aws.lanexa.my.id&path=/trojan-tls&sni=aws.lanexa.my.id#alluser',
+      }
+    ],
     authorName: "Lanexa",
-    isComingSoon: true,
+    isComingSoon: false,
   },
   {
     id: 'telkomsel-opok',
