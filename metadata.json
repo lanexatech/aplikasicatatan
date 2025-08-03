@@ -1,5 +1,5 @@
 {
-  "name": "Aplikasi Catatan Kartu",
-  "description": "Sebuah aplikasi web untuk membuat dan mengelola catatan dalam format kartu yang menarik secara visual.",
+  "name": "Simple Blue & White Card UI",
+  "description": "A simple and elegant web application featuring a single-column card layout with a blue and white color scheme, built with React and Tailwind CSS.",
   "requestFramePermissions": []
 }
