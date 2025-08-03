@@ -7,61 +7,34 @@ import Login from './components/Login';
 import Modal from './components/Modal';
 import Description from './components/Description';
 
-const NOTES_STORAGE_KEY = 'notes-app-data'; // Kunci statis untuk semua pengguna
-
 type View = 'description' | 'login' | 'app';
+
+// Data catatan awal sebagai simulasi database bersama.
+// Dalam aplikasi nyata, data ini akan diambil dari server.
+const initialNotes: Note[] = [];
+
 
 const App: React.FC = () => {
   const [view, setView] = useState<View>('description');
   const [userName, setUserName] = useState<string | null>(null);
-  const [notes, setNotes] = useState<Note[]>([]);
+  // State notes sekarang diinisialisasi dengan data bersama, bukan dari localStorage.
+  const [notes, setNotes] = useState<Note[]>(initialNotes);
   const [activeNoteId, setActiveNoteId] = useState<string | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [noteToDeleteId, setNoteToDeleteId] = useState<string | null>(null);
 
   const isAdmin = userName === 'larenva';
   
-  // Effect untuk memeriksa pengguna yang login dan menentukan tampilan awal
+  // Effect untuk memeriksa pengguna yang login dari localStorage
   useEffect(() => {
     const savedUser = localStorage.getItem('notes-app-user');
     if (savedUser) {
       setUserName(savedUser);
-      setView('app'); // Langsung ke aplikasi jika sudah login
-    }
-    // Jika tidak, state default 'description' akan digunakan
-  }, []);
-
-  // Effect untuk memuat catatan dari localStorage saat aplikasi dimulai
-  useEffect(() => {
-    try {
-      const savedNotesRaw = localStorage.getItem(NOTES_STORAGE_KEY);
-      if (savedNotesRaw) {
-        const savedNotes: Note[] = JSON.parse(savedNotesRaw);
-        // Migrasi data: Tetapkan 'larenva' sebagai pembuat catatan lama yang tidak memiliki pemilik
-        const migratedNotes = savedNotes.map(note => ({
-          ...note,
-          createdBy: note.createdBy || 'larenva' 
-        }));
-        setNotes(migratedNotes);
-      } else {
-        setNotes([]);
-      }
-    } catch (error) {
-      console.error("Could not load notes from localStorage", error);
-      setNotes([]);
+      setView('app');
     }
   }, []);
-
-  // Effect untuk menyimpan catatan setiap kali berubah
-  useEffect(() => {
-    try {
-      localStorage.setItem(NOTES_STORAGE_KEY, JSON.stringify(notes));
-    } catch (error) {
-      console.error("Could not save notes to localStorage", error);
-    }
-  }, [notes]);
-
-  // Effect untuk membatalkan pilihan catatan jika dihapus
+  
+  // Effect untuk membatalkan pilihan catatan jika catatan aktif dihapus
   useEffect(() => {
     if (activeNoteId && !notes.find(note => note.id === activeNoteId)) {
         setActiveNoteId(null);
@@ -85,11 +58,11 @@ const App: React.FC = () => {
     localStorage.removeItem('notes-app-user');
     setUserName(null);
     setActiveNoteId(null);
-    setView('login'); // Kembali ke halaman login setelah keluar
+    setView('login');
   };
 
   const handleNewNote = useCallback(() => {
-    if (!userName) return; // Seharusnya tidak terjadi karena UI disembunyikan
+    if (!userName) return;
     const newNote: Note = {
       id: crypto.randomUUID(),
       title: 'Catatan Baru',
@@ -97,11 +70,13 @@ const App: React.FC = () => {
       lastModified: Date.now(),
       createdBy: userName,
     };
+    // Menambahkan catatan baru ke state di memori
     setNotes((prevNotes) => [newNote, ...prevNotes]);
     setActiveNoteId(newNote.id);
   }, [userName]);
 
   const handleUpdateNote = useCallback((id: string, title: string, content: string) => {
+    // Memperbarui catatan di state memori
     setNotes((prevNotes) =>
       prevNotes.map((note) =>
         note.id === id ? { ...note, title, content, lastModified: Date.now() } : note
@@ -116,6 +91,7 @@ const App: React.FC = () => {
 
   const handleConfirmDelete = () => {
     if (noteToDeleteId) {
+      // Menghapus catatan dari state memori
       setNotes((prevNotes) => prevNotes.filter((note) => note.id !== noteToDeleteId));
       setNoteToDeleteId(null);
       setIsDeleteModalOpen(false);
