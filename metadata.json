@@ -1,6 +1,5 @@
 {
-  "name": "Catatan Cerdas",
-  "description": "Aplikasi pencatatan canggih yang didukung oleh AI untuk membantu Anda meringkas, memperbaiki tata bahasa, dan menghasilkan ide-ide baru dari catatan Anda. Semua data disimpan secara lokal di browser Anda.",
-  "requestFramePermissions": [],
-  "prompt": ""
+  "name": "Aplikasi Catatan Kartu",
+  "description": "Sebuah aplikasi web untuk membuat dan mengelola catatan dalam format kartu yang menarik secara visual.",
+  "requestFramePermissions": []
 }

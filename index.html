@@ -1,41 +1,41 @@
+
 <!DOCTYPE html>
-<html lang="id">
-  <head>
-    <meta charset="UTF-g" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Catatan Cerdas</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-      /* Simple scrollbar styling for a more modern look */
-      ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aplikasi Catatan Kartu</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class', // or 'media'
+      theme: {
+        extend: {
+          colors: {
+            'note-yellow': '#fffbeb',
+            'note-blue': '#eff6ff',
+            'note-green': '#f0fdf4',
+            'note-pink': '#fdf2f8',
+            'note-purple': '#f5f3ff',
+            'note-orange': '#fff7ed',
+          }
+        }
       }
-      ::-webkit-scrollbar-track {
-        background: #f1f5f9; /* slate-100 */
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #94a3b8; /* slate-400 */
-        border-radius: 10px;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #64748b; /* slate-500 */
-      }
-    </style>
-  <script type="importmap">
+    }
+  </script>
+<script type="importmap">
 {
   "imports": {
-    "react-dom/": "https://esm.sh/react-dom@^19.1.1/",
-    "react/": "https://esm.sh/react@^19.1.1/",
     "react": "https://esm.sh/react@^19.1.1",
-    "@google/genai": "https://esm.sh/@google/genai@^1.12.0"
+    "react-dom/": "https://esm.sh/react-dom@^19.1.1/",
+    "react/": "https://esm.sh/react@^19.1.1/"
   }
 }
 </script>
 <link rel="stylesheet" href="/index.css">
 </head>
-  <body class="bg-slate-100">
-    <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
-  </body>
+<body class="bg-gray-50 dark:bg-gray-900">
+  <div id="root"></div>
+<script type="module" src="/index.tsx"></script>
+</body>
 </html>

@@ -3,6 +3,6 @@ export interface Note {
   id: string;
   title: string;
   content: string;
-  lastModified: number;
-  createdBy: string;
+  color: string;
+  createdAt: string;
 }

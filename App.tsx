@@ -1,168 +1,102 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Note } from './types';
+
+import React, { useState, useEffect } from 'react';
+import { type Note } from './types';
+import { NOTE_COLORS } from './constants';
 import Header from './components/Header';
-import NoteList from './components/NoteList';
-import NoteEditor from './components/NoteEditor';
-import Login from './components/Login';
-import Modal from './components/Modal';
-import Description from './components/Description';
-
-type View = 'description' | 'login' | 'app';
-
-// Data catatan awal sebagai simulasi database bersama.
-// Dalam aplikasi nyata, data ini akan diambil dari server.
-const initialNotes: Note[] = [];
-
+import NoteCard from './components/NoteCard';
+import NoteFormModal from './components/NoteFormModal';
+import PlusIcon from './components/icons/PlusIcon';
 
 const App: React.FC = () => {
-  const [view, setView] = useState<View>('description');
-  const [userName, setUserName] = useState<string | null>(null);
-  // State notes sekarang diinisialisasi dengan data bersama, bukan dari localStorage.
-  const [notes, setNotes] = useState<Note[]>(initialNotes);
-  const [activeNoteId, setActiveNoteId] = useState<string | null>(null);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [noteToDeleteId, setNoteToDeleteId] = useState<string | null>(null);
+    const [notes, setNotes] = useState<Note[]>(() => {
+        try {
+            const savedNotes = localStorage.getItem('notes-app-data');
+            return savedNotes ? JSON.parse(savedNotes) : [];
+        } catch (error) {
+            console.error("Could not parse saved notes:", error);
+            return [];
+        }
+    });
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingNote, setEditingNote] = useState<Note | null>(null);
 
-  const isAdmin = userName === 'larenva';
-  
-  // Effect untuk memeriksa pengguna yang login dari localStorage
-  useEffect(() => {
-    const savedUser = localStorage.getItem('notes-app-user');
-    if (savedUser) {
-      setUserName(savedUser);
-      setView('app');
-    }
-  }, []);
-  
-  // Effect untuk membatalkan pilihan catatan jika catatan aktif dihapus
-  useEffect(() => {
-    if (activeNoteId && !notes.find(note => note.id === activeNoteId)) {
-        setActiveNoteId(null);
-    }
-  }, [notes, activeNoteId]);
-  
-  const handleContinueFromDescription = () => {
-    setView('login');
-  };
+    useEffect(() => {
+        try {
+            localStorage.setItem('notes-app-data', JSON.stringify(notes));
+        } catch (error) {
+            console.error("Could not save notes:", error);
+        }
+    }, [notes]);
 
-  const handleLogin = (name: string) => {
-    const trimmedName = name.trim();
-    if (trimmedName) {
-      localStorage.setItem('notes-app-user', trimmedName);
-      setUserName(trimmedName);
-      setView('app');
-    }
-  };
-  
-  const handleLogout = () => {
-    localStorage.removeItem('notes-app-user');
-    setUserName(null);
-    setActiveNoteId(null);
-    setView('login');
-  };
-
-  const handleNewNote = useCallback(() => {
-    if (!userName) return;
-    const newNote: Note = {
-      id: crypto.randomUUID(),
-      title: 'Catatan Baru',
-      content: '',
-      lastModified: Date.now(),
-      createdBy: userName,
+    const handleAddNoteClick = () => {
+        setEditingNote(null);
+        setIsModalOpen(true);
     };
-    // Menambahkan catatan baru ke state di memori
-    setNotes((prevNotes) => [newNote, ...prevNotes]);
-    setActiveNoteId(newNote.id);
-  }, [userName]);
 
-  const handleUpdateNote = useCallback((id: string, title: string, content: string) => {
-    // Memperbarui catatan di state memori
-    setNotes((prevNotes) =>
-      prevNotes.map((note) =>
-        note.id === id ? { ...note, title, content, lastModified: Date.now() } : note
-      )
+    const handleEditNoteClick = (note: Note) => {
+        setEditingNote(note);
+        setIsModalOpen(true);
+    };
+
+    const handleDeleteNote = (id: string) => {
+        setNotes(notes.filter(note => note.id !== id));
+    };
+
+    const handleSaveNote = (noteData: { title: string; content: string; color: string }) => {
+        if (editingNote) {
+            setNotes(notes.map(note => note.id === editingNote.id ? { ...editingNote, ...noteData } : note));
+        } else {
+            const newNote: Note = {
+                id: `note-${Date.now()}`,
+                ...noteData,
+                createdAt: new Date().toISOString(),
+            };
+            setNotes([newNote, ...notes]);
+        }
+        setIsModalOpen(false);
+        setEditingNote(null);
+    };
+
+    return (
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 font-sans transition-colors duration-300">
+            <Header />
+            <main className="p-4 sm:p-6 md:p-8">
+                {notes.length === 0 ? (
+                    <div className="text-center py-20">
+                        <h2 className="text-2xl font-semibold text-gray-500 dark:text-gray-400">Tidak ada catatan</h2>
+                        <p className="mt-2 text-gray-400 dark:text-gray-500">Klik tombol '+' untuk menambahkan catatan baru.</p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {notes.map(note => (
+                            <NoteCard
+                                key={note.id}
+                                note={note}
+                                onEdit={() => handleEditNoteClick(note)}
+                                onDelete={() => handleDeleteNote(note.id)}
+                            />
+                        ))}
+                    </div>
+                )}
+            </main>
+
+            <button
+                onClick={handleAddNoteClick}
+                className="fixed bottom-8 right-8 bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg focus:outline-none focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800 transition-transform transform hover:scale-110"
+                aria-label="Tambah Catatan Baru"
+            >
+                <PlusIcon />
+            </button>
+
+            {isModalOpen && (
+                <NoteFormModal
+                    note={editingNote}
+                    onSave={handleSaveNote}
+                    onClose={() => setIsModalOpen(false)}
+                />
+            )}
+        </div>
     );
-  }, []);
-
-  const handleDeleteRequest = (id: string) => {
-    setNoteToDeleteId(id);
-    setIsDeleteModalOpen(true);
-  };
-
-  const handleConfirmDelete = () => {
-    if (noteToDeleteId) {
-      // Menghapus catatan dari state memori
-      setNotes((prevNotes) => prevNotes.filter((note) => note.id !== noteToDeleteId));
-      setNoteToDeleteId(null);
-      setIsDeleteModalOpen(false);
-    }
-  };
-
-  const handleCancelDelete = () => {
-    setNoteToDeleteId(null);
-    setIsDeleteModalOpen(false);
-  };
-
-  const activeNote = notes.find((note) => note.id === activeNoteId) || null;
-  // Catatan dapat diedit jika pengguna adalah admin ATAU pembuat catatan
-  const isNoteEditable = activeNote ? (isAdmin || activeNote.createdBy === userName) : false;
-
-  if (view === 'description') {
-    return <Description onContinue={handleContinueFromDescription} />;
-  }
-
-  if (view === 'login') {
-    return <Login onLogin={handleLogin} />;
-  }
-
-  return (
-    <div className="flex flex-col h-screen font-sans">
-      <Header userName={userName!} onLogout={handleLogout} />
-      <main className="flex flex-1 overflow-hidden">
-        {/* Kontainer Daftar Catatan: disembunyikan di seluler saat catatan aktif */}
-        <div className={`
-          ${activeNoteId ? 'hidden' : 'flex'} w-full sm:flex sm:w-80
-        `}>
-          <NoteList
-            notes={notes}
-            activeNoteId={activeNoteId}
-            onSelectNote={setActiveNoteId}
-            onNewNote={handleNewNote}
-            isAdmin={isAdmin}
-            onDeleteNote={handleDeleteRequest}
-          />
-        </div>
-
-        {/* Kontainer Editor Catatan: ditampilkan di seluler hanya saat catatan aktif */}
-        <div className={`
-          ${activeNote ? 'flex' : 'hidden'} w-full sm:flex sm:flex-1
-        `}>
-          {activeNote ? (
-            <NoteEditor 
-                activeNote={activeNote} 
-                onUpdateNote={handleUpdateNote}
-                onBack={() => setActiveNoteId(null)}
-                isEditable={isNoteEditable}
-            />
-          ) : (
-             <div className="flex-1 flex-col items-center justify-center bg-white text-slate-500 p-8 hidden sm:flex">
-                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="text-slate-300 mb-4"><path d="M2 6s.5-1 2-1h16c1.5 0 2 1 2 1v12c0 1.5-1.5 2-2 2H4c-1.5 0-2-.5-2-2Z"/><path d="M2 6h20"/><path d="M12 6v14"/></svg>
-                <h2 className="text-xl font-semibold">Pilih catatan untuk dilihat</h2>
-                <p>Atau buat catatan baru untuk memulai.</p>
-              </div>
-          )}
-        </div>
-      </main>
-      <Modal
-        isOpen={isDeleteModalOpen}
-        onClose={handleCancelDelete}
-        onConfirm={handleConfirmDelete}
-        title="Hapus Catatan"
-      >
-        Apakah Anda yakin ingin menghapus catatan ini secara permanen? Tindakan ini tidak dapat diurungkan.
-      </Modal>
-    </div>
-  );
 };
 
 export default App;

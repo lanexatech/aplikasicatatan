@@ -1,38 +1,57 @@
-import React from 'react';
 
-interface HeaderProps {
-    userName: string;
-    onLogout: () => void;
-}
+import React, { useState, useEffect } from 'react';
 
-const Header: React.FC<HeaderProps> = ({ userName, onLogout }) => {
-  return (
-    <header className="flex items-center p-4 bg-white border-b border-slate-200 shadow-sm">
-      <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-indigo-600">
-        <path d="M15.5 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8.5L15.5 3Z" />
-        <path d="M15 3v6h6" />
-        <path d="m10 15-1.5 1.5" />
-        <path d="m14 11-1.5 1.5" />
-        <path d="M8 13h1" />
-        <path d="M12 17h1" />
-      </svg>
-      <h1 className="text-xl font-bold text-slate-800 ml-3 flex-grow">
-        Catatan Cerdas
-      </h1>
-      <div className="flex items-center gap-4">
-        <span className="text-sm text-slate-600 hidden sm:block">
-            Halo, <span className="font-semibold">{userName}</span>
-        </span>
-        <button 
-            onClick={onLogout}
-            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-slate-700 bg-slate-100 border border-slate-300 rounded-md shadow-sm hover:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
-        >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-            Keluar
-        </button>
-      </div>
-    </header>
-  );
+const SunIcon: React.FC = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+    </svg>
+);
+
+const MoonIcon: React.FC = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+    </svg>
+);
+
+
+const Header: React.FC = () => {
+    const [isDarkMode, setIsDarkMode] = useState(() => {
+         if (typeof window !== 'undefined') {
+            return localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+         }
+         return false;
+    });
+
+    useEffect(() => {
+        if (isDarkMode) {
+            document.documentElement.classList.add('dark');
+            localStorage.theme = 'dark';
+        } else {
+            document.documentElement.classList.remove('dark');
+            localStorage.theme = 'light';
+        }
+    }, [isDarkMode]);
+
+    const toggleTheme = () => {
+        setIsDarkMode(!isDarkMode);
+    };
+    
+    return (
+        <header className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm sticky top-0 z-10 shadow-sm">
+            <div className="container mx-auto px-4 sm:px-6 md:px-8 py-4 flex justify-between items-center">
+                <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
+                    Catatan Kartu
+                </h1>
+                <button
+                    onClick={toggleTheme}
+                    className="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 dark:focus:ring-offset-gray-800 focus:ring-blue-500"
+                    aria-label="Toggle dark mode"
+                >
+                    {isDarkMode ? <SunIcon /> : <MoonIcon />}
+                </button>
+            </div>
+        </header>
+    );
 };
 
 export default Header;
